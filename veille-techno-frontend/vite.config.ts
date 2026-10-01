@@ -17,4 +17,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    proxy: {
+      // The back end does not enable CORS: the browser calls /api on Vite, which forwards it.
+      // nginx plays the same role in the Docker image.
+      '/api': 'http://localhost:3000',
+    },
+  },
 })
