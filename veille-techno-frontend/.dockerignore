@@ -1,0 +1,16 @@
+# Installed and built inside the image: the local copies must not be sent
+node_modules
+dist
+
+# Test, lint and editor leftovers
+coverage
+test-results
+playwright-report
+.eslintcache
+.vscode
+*.log
+
+# Docker files are not needed inside the build
+Dockerfile
+.dockerignore
+docker-compose.yml

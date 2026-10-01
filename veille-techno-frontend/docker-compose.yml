@@ -1,0 +1,14 @@
+# Front end served by nginx: `docker compose up -d --build`, then http://localhost:8080.
+# The back end keeps running on the host (see its README): nginx forwards /api to it.
+# `name` keeps the Compose project name independent of the directory name.
+name: kanban-front
+
+services:
+  front:
+    build: .
+    image: kanban-front
+    container_name: kanban-front
+    ports:
+      - "8080:80"
+    environment:
+      API_URL: http://host.docker.internal:3000

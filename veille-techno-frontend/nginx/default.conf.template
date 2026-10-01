@@ -1,0 +1,29 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Compress text responses: the JavaScript bundle is more than halved.
+    gzip on;
+    gzip_types text/css application/javascript text/javascript application/json image/svg+xml;
+
+    # Same role as the Vite proxy in development: /api goes to the back end, path unchanged.
+    location /api {
+        proxy_pass ${API_URL};
+    }
+
+    # Vite puts a hash in every file name under /assets: they can be cached for good.
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    # Every other path is a Vue Router route: serve index.html, so a refresh on /login works.
+    # index.html is revalidated on each visit, so a new build is picked up at once.
+    location / {
+        add_header Cache-Control "no-cache";
+        try_files $uri $uri/ /index.html;
+    }
+}
