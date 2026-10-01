@@ -1,5 +1,18 @@
 # veille-techno-frontend
 
+## Lancer le front en développement
+
+Prérequis : Node.js 24, et le back [veille-techno-backend](https://github.com/BaptisteAPPRIOU/veille-techno-backend) lancé en local sur le port 3000 (voir son README).
+
+Depuis le dossier de l'application, `veille-techno-frontend/` :
+
+```bash
+npm install
+npm run dev   # sert l'application sur http://localhost:5173
+```
+
+Le back n'active pas CORS : le navigateur appelle toujours `/api/...` sur le serveur de Vite, qui transmet à `http://localhost:3000` (proxy déclaré dans `vite.config.ts`). Le même code fonctionne derrière nginx dans Docker. Si le back est arrêté, les appels reçoivent une erreur 502, que le client traduit en « API injoignable ».
+
 ## Lancer le front avec Docker
 
 Prérequis : Docker Desktop, et le back [veille-techno-backend](https://github.com/BaptisteAPPRIOU/veille-techno-backend) lancé en local sur le port 3000 (voir son README).
