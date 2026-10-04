@@ -1,5 +1,7 @@
+<script setup lang="ts">
+import AuthForm from '@/components/AuthForm.vue'
+</script>
+
 <template>
-  <main>
-    <h1>Inscription</h1>
-  </main>
+  <AuthForm :register="true" />
 </template>

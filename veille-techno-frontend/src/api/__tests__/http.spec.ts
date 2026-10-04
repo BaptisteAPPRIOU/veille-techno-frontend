@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { ApiError, request, setAuthToken, UNREACHABLE_MESSAGE } from '@/api/http'
+import {
+  ApiError,
+  request,
+  setAuthToken,
+  setUnauthorizedHandler,
+  UNREACHABLE_MESSAGE,
+} from '@/api/http'
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -20,6 +26,7 @@ describe('request', () => {
     fetchMock.mockReset()
     vi.unstubAllGlobals()
     setAuthToken(null)
+    setUnauthorizedHandler(null)
   })
 
   it('sends a JSON body to /api and returns the parsed answer', async () => {
@@ -75,6 +82,27 @@ describe('request', () => {
       status: 401,
       messages: ['Unauthorized'],
     })
+  })
+
+  it('expires the session on a 401 from a protected resource', async () => {
+    const onUnauthorized = vi.fn<() => void>()
+    setUnauthorizedHandler(onUnauthorized)
+    fetchMock.mockResolvedValue(jsonResponse(401, { message: 'Unauthorized' }))
+
+    await expect(request('GET', '/lists')).rejects.toMatchObject({ status: 401 })
+
+    expect(onUnauthorized).toHaveBeenCalledOnce()
+  })
+
+  it('leaves an auth 401 to the form instead of expiring the session', async () => {
+    const onUnauthorized = vi.fn<() => void>()
+    setUnauthorizedHandler(onUnauthorized)
+    fetchMock.mockResolvedValue(jsonResponse(401, { message: 'Invalid credentials' }))
+
+    await expect(request('POST', '/auth/login', {})).rejects.toMatchObject({ status: 401 })
+    await expect(request('POST', '/auth/register', {})).rejects.toMatchObject({ status: 401 })
+
+    expect(onUnauthorized).not.toHaveBeenCalled()
   })
 
   it('reports the API as unreachable on a 502 from the proxy', async () => {

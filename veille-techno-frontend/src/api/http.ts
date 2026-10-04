@@ -22,10 +22,16 @@ export class ApiError extends Error {
 }
 
 let authToken: string | null = null
+let unauthorizedHandler: (() => void) | null = null
 
 /** Token sent as `Authorization: Bearer` with every call; null stops sending it. */
 export function setAuthToken(token: string | null): void {
   authToken = token
+}
+
+// main.ts fournit la déconnexion et la redirection, sans importer le router ici.
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  unauthorizedHandler = handler
 }
 
 export async function request<T>(method: Method, path: string, body?: unknown): Promise<T> {
@@ -50,6 +56,10 @@ export async function request<T>(method: Method, path: string, body?: unknown): 
   }
 
   if (!response.ok) {
+    // Un mauvais mot de passe doit rester une erreur du formulaire de connexion.
+    if (response.status === 401 && !path.startsWith('/auth/')) {
+      unauthorizedHandler?.()
+    }
     throw await toApiError(response)
   }
   // DELETE routes answer 204 without a body.
