@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import BoardView from '../views/BoardView.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,6 +9,7 @@ const router = createRouter({
       path: '/',
       name: 'board',
       component: BoardView,
+      meta: { requiresAuth: true },
     },
     // Login and register are only needed before signing in, so they are loaded on demand
     // and kept out of the bundle that displays the board.
@@ -28,6 +30,13 @@ const router = createRouter({
       redirect: '/',
     },
   ],
+})
+
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  if (to.meta.requiresAuth && !auth.token) {
+    return { name: 'login' }
+  }
 })
 
 export default router
